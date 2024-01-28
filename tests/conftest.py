@@ -1,27 +1,37 @@
+from types import SimpleNamespace
+
 import pytest
 from selenium import webdriver
-from webdriver_manager.chrome import ChromeDriverManager
-from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.chrome.options import Options as ChromeOptions
+from selenium.webdriver.firefox.options import Options as FirefoxOptions
 from pages.browser import Browser
-from types import SimpleNamespace
 
 
 @pytest.fixture(scope="session")
 def test_data():
     return SimpleNamespace(
-        RECALL_ARTICLE_URL="https://www.consumeraffairs.com/recalls/liberty-mountain-recalls-birdie-belay-devices-032921.html",
-        RECALL_ARTICLE_DISC_TEXT="ConsumerAffairs is not a government agency and may be compensated by companies displayed. How it works.",
-        FAQ_URL="https://www.consumeraffairs.com/about/faq/",
-        FOOTER_TEXT="ConsumerAffairs is not a government agency. Companies displayed may pay us to be Authorized or when you click a link, call a number or fill a form on our site. Our content is intended to be used for general information purposes only. It is very important to do your own analysis before making any investment based on your own personal circumstances and consult with your own investment, financial, tax and legal advisers.",
-        FIND_MY_MATCH_WARRANTY_URL="https://my.consumeraffairs.com/home-warranty/?element_label=in_content_mt_cta&zip=",
-        FIND_MY_MATCH_ALARM_URL="https://my.consumeraffairs.com/home-alarm/get-matched/?element_label=in_content_mt_cta&zip=",
-        ZIP_CODE="98001",
+        HOME_URL="https://magento.softwaretestingboard.com/",
+        TEST_SEARCH_URL="https://magento.softwaretestingboard.com/catalogsearch/result/?q=Breathe",
+        TEST_PRODUCT_1="https://magento.softwaretestingboard.com/radiant-tee.html",
+        TEST_PRODUCT_2="https://magento.softwaretestingboard.com/iris-workout-top.html",
+        TEST_PRODUCT_3="https://magento.softwaretestingboard.com/karissa-v-neck-tee.html",
+        CART_PAGE="https://magento.softwaretestingboard.com/checkout/cart/",
+        VALID_ORDER_ID="000042185",
+        INVALID_ORDER_ID="XXXXXXXXX",
+        TEST_CUSTOMER_LAST_NAME="Corrêa",
+        TEST_CUSTOMER_EMAIL="matheuspessoax@gmail.com",
+        ORDERS_RETURNS_FORM_ALERT_TEXT="You entered incorrect data. Please try again.",
     )
 
 
-@pytest.fixture(scope="session")
-def browser():
-    options = Options()
-    #options.add_argument("--headless")
-    driver = webdriver.Chrome(ChromeDriverManager().install(), options=options)
-    return Browser(driver)
+@pytest.fixture(params=["chrome", "firefox"], scope="session")
+def browser(request):
+    if request.param == "chrome":
+        options = ChromeOptions()
+        options.add_argument("--headless")
+        web_driver = webdriver.Chrome(options=options)
+    elif request.param == "firefox":
+        options = FirefoxOptions()
+        options.add_argument("--headless")
+        web_driver = webdriver.Firefox(options=options)
+    return Browser(web_driver)

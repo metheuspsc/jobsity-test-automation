@@ -1,5 +1,8 @@
+import contextlib
+import time
 from urllib.parse import unquote
 
+from selenium.common import TimeoutException
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 
@@ -14,7 +17,7 @@ class Browser:
         return getattr(self.driver, item)
 
     def wait_for_element(self, locator):
-        return WebDriverWait(self.driver, 5).until(
+        return WebDriverWait(self.driver, 10).until(
             EC.visibility_of_element_located(locator))
 
     def do_click(self, locator):
@@ -26,12 +29,19 @@ class Browser:
         ).submit()
 
     def do_send_keys(self, locator, text):
-        WebDriverWait(self.driver, 5).until(
-            EC.visibility_of_element_located(locator)
-        ).send_keys(text)
+        for char in text:
+            WebDriverWait(self.driver, 5).until(
+                EC.visibility_of_element_located(locator)
+            ).send_keys(char)
+            time.sleep(0.2)
         WebDriverWait(self.driver, 5).until(
             EC.text_to_be_present_in_element_value(locator, text)
         )
+
+    def do_clear(self, locator):
+        WebDriverWait(self.driver, 5).until(
+            EC.visibility_of_element_located(locator)
+        ).clear()
 
     def click_and_wait_redirect(self, locator):
         self.do_submit(locator)
@@ -46,6 +56,15 @@ class Browser:
         )
         return element.text
 
+    def get_element_list(self, locator):
+        return WebDriverWait(self.driver, 5).until(
+            EC.visibility_of_all_elements_located(locator)
+        )
+
+    def get_text_list(self, locator):
+        elements = self.get_element_list(locator)
+        return [element.text for element in elements]
+
     def get_href(self, locator):
         element = WebDriverWait(self.driver, 5).until(
             EC.visibility_of_element_located(locator)
@@ -53,6 +72,22 @@ class Browser:
         href = element.get_attribute("href")
         return unquote(href)
 
+    def wait_for_url_redirect(self, current_url, timeout=5):
+        """Waits for url to redirect after performing an action
+
+        Args:
+            current_url: current url the page is on.
+            timeout: wait time for page to redirect.
+        """
+        wait = WebDriverWait(self.driver, timeout)
+        wait.until(lambda driver: driver.current_url != current_url)
+
+    def wait_for_complete(self, timeout=30):
+        """Waits until page completes loading"""
+        with contextlib.suppress(TimeoutException):
+            wait_driver = WebDriverWait(self.driver, timeout)
+            return wait_driver.until(
+                lambda driver: driver.execute_script("return document.readyState") == "complete")
 
 class Tab(Browser):
 

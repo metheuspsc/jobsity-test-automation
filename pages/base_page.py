@@ -1,3 +1,6 @@
+import time
+
+
 class BasePage:
     """Parent class for pages."""
 
@@ -12,9 +15,11 @@ class BasePage:
 
     def load(self, url):
         self.browser.get(url)
+        self.browser.wait_for_complete()
 
     def __enter__(self):
         return self
 
     def __exit__(self, exc_type, exc_value, exc_tb):
         self.browser.close()
+        time.sleep(3)
