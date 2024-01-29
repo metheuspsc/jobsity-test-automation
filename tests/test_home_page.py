@@ -3,14 +3,8 @@ import pytest
 from pages.home_page import HomePage
 
 
-@pytest.fixture(scope="function")
-def home_page(browser, test_data):
-    with HomePage(browser, test_data.HOME_URL) as home_page:
-        yield home_page
-
-
 @pytest.mark.parametrize("term", (["Backpack", "Hoodie", "Breathe"]))
-def test_search_bar_valid_term(home_page, test_data, term):
+def test_search_bar_valid_term(browser, test_data, term):
     """
     Tests the search bar functionality with valid search terms.
 
@@ -28,15 +22,16 @@ def test_search_bar_valid_term(home_page, test_data, term):
     Asserts:
         All search results are relevant to the term, indicating correct search functionality.
     """
-    current_url = home_page.browser.current_url
-    home_page.fill_search_bar(term=term)
-    home_page.browser.wait_for_url_redirect(current_url=current_url)
-    results = home_page.get_product_text()
-    assert all([term in result for result in
-                results]), f"Search returned unrelated items: {[result for result in results if term not in result]}"
+    with HomePage(browser, test_data.HOME_URL) as home_page:
+        current_url = home_page.browser.current_url
+        home_page.fill_search_bar(term=term)
+        home_page.browser.wait_for_url_redirect(current_url=current_url)
+        results = home_page.get_product_text()
+        assert all([term in result for result in
+                    results]), f"Search returned unrelated items: {[result for result in results if term not in result]}"
 
 
-def test_search_bar_invalid_term(home_page, test_data):
+def test_search_bar_invalid_term(browser, test_data):
     """
     Tests the search bar functionality with an invalid search term.
 
@@ -52,13 +47,14 @@ def test_search_bar_invalid_term(home_page, test_data):
     Asserts:
         The displayed message matches the expected 'no results' text.
     """
-    home_page.fill_search_bar(term="ajhfioeaqh")
-    home_page.browser.wait_for_url_redirect(current_url=test_data.HOME_URL)
-    result = home_page.get_search_message_notice()
-    assert result == "Your search returned no results."
+    with HomePage(browser, test_data.HOME_URL) as home_page:
+        home_page.fill_search_bar(term="ajhfioeaqh")
+        home_page.browser.wait_for_url_redirect(current_url=test_data.HOME_URL)
+        result = home_page.get_search_message_notice()
+        assert result == "Your search returned no results."
 
 
-def test_autosuggestion(home_page, test_data):
+def test_autosuggestion(browser, test_data):
     """
     Verifies the autosuggestion feature of the search bar.
 
@@ -74,6 +70,7 @@ def test_autosuggestion(home_page, test_data):
     Asserts:
         The entered term appears in the autosuggestions, indicating the autosuggestion feature is functional.
     """
-    home_page.fill_search_bar(term="Breathe", submit=False)
-    autosuggestion_terms = home_page.get_autosuggestion_terms()
-    assert "Breathe" in autosuggestion_terms
+    with HomePage(browser, test_data.HOME_URL) as home_page:
+        home_page.fill_search_bar(term="Breathe", submit=False)
+        autosuggestion_terms = home_page.get_autosuggestion_terms()
+        assert "Breathe" in autosuggestion_terms

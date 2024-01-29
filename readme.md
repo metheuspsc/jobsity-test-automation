@@ -75,8 +75,18 @@ Before starting you need the following dependencies:
 
 ## 🚀 Setup
 
+### Windows
 ```
+python -m venv venv
 ./venv/scripts/activate
+pip install -r requirements.txt
+pytest -n auto --reruns 2 --rerun-except AssertionError --reruns-delay 2
+```
+
+### Mac & Linux
+```
+python3 -m venv venv
+source venv/bin/activate
 pip install -r requirements.txt
 pytest -n auto --reruns 2 --rerun-except AssertionError --reruns-delay 2
 ```

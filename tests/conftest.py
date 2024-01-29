@@ -5,6 +5,10 @@ from selenium import webdriver
 from selenium.webdriver.chrome.options import Options as ChromeOptions
 from selenium.webdriver.firefox.options import Options as FirefoxOptions
 from pages.browser import Browser
+import pytest
+from selenium import webdriver
+from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
+from pages.browser import Browser
 
 
 @pytest.fixture(scope="session")
@@ -24,7 +28,8 @@ def test_data():
     )
 
 
-@pytest.fixture(params=["chrome", "firefox"], scope="session")
+
+@pytest.fixture(params=["chrome", "firefox"], scope="function")
 def browser(request):
     if request.param == "chrome":
         options = ChromeOptions()
